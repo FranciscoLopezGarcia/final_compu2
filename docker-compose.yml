@@ -1,0 +1,35 @@
+# docker-compose.yml
+
+version: '3'
+
+services:
+  servidor:
+    build: .
+    container_name: blackjack-servidor
+    command: python server.py
+    ports:
+      - "65432:65432"
+    networks:
+      - blackjack-net
+
+  cliente1:
+    build: .
+    container_name: blackjack-cliente1
+    command: python client.py
+    networks:
+      - blackjack-net
+    stdin_open: true
+    tty: true
+
+  cliente2:
+    build: .
+    container_name: blackjack-cliente2
+    command: python client.py
+    networks:
+      - blackjack-net
+    stdin_open: true
+    tty: true
+
+networks:
+  blackjack-net:
+    driver: bridge
