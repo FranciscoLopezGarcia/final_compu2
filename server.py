@@ -1,22 +1,44 @@
 import socket
 import threading
+from blackjack import Blackjack
+from player import Player
+
 
 HOST = '0.0.0.0'
-PORT = 22223
+PORT = 22224
 
 def manejo_cliente(conection, address):
     print(f"Conexión establecida con {address}")
-    conection.sendall(b"Conectado al servidor\n")
+    conection.sendall(b"Conectado al servidor. Ingrese su nombre:\n")
+
+    nombre = conection.recv(1024).decode().strip()
+    jugador = Player(nombre)
+    juego = Blackjack(jugador)
+
+    conection.sendall(f"Bienvenido {nombre}\n".encode())
+
+
+
     while True:
         try:
             data= conection.recv(1024)
             if not data:
                 break
-            print(f"[{address}] -> {data.decode().strip()}")
-            conection.sendall(b"Recibido\n")
+
+            msj = data.decode().lower()
+            if msj == "pedir":
+                carta = juego.repartir()
+                estado = juego.get_status()
+                rta = f"Carta: {carta}, Total: {estado['total']}, \n Estado: {estado['estado']}, \n"
+            else:
+                rta = "Comando no reconocido. Intente 'pedir' para recibir una carta.\n"
+
+            conection.sendall(rta.encode())
 
         except:
             break
+
+
     print(f"Cliente {address} desconectado")
     conection.close()
 
