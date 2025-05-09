@@ -1,9 +1,9 @@
 #Tareas a realizar
 
-- [ ] Implementar TCP
-    - [ ] server multiples conexiones, threading
-    - [ ] client se contecta c IP y Puerto
-    - [ ] confir conexion
+- [x] Implementar TCP
+    - [x] server multiples conexiones, threading
+    - [x] client se contecta c IP y Puerto
+    - [x] confir conexion
 
 - [ ] Estructura
     - [ ] player.py: clase Player(nombre, mano, total, estado)
