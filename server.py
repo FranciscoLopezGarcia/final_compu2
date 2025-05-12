@@ -1,6 +1,5 @@
 import socket
 import threading
-from blackjack import Blackjack
 from player import Player
 from mesa import MesaBlackjack
 
@@ -15,11 +14,11 @@ def manejo_cliente(conection, address):
     global siguiente_id_mesa
 
     print(f"[+] Conexión desde {address}")
-    conection.sendall(b"Bienvenido al servidor de Blackjack.\nIngrese su nombre:\n")
+    conection.sendall("Bienvenido al servidor de Blackjack.\nIngrese su nombre:\n".encode())
     nombre = conection.recv(1024).decode().strip()
     jugador = Player(nombre)
 
-    conection.sendall(b"Comandos:\n[VER_MESAS]\n[CREAR_MESA]\n[UNIRSE_MESA <id>]\n")
+    conection.sendall("Comandos:\n[VER_MESAS]\n[CREAR_MESA]\n[UNIRSE_MESA <id>]\n".encode())
 
     mesa_asignada = None
 
@@ -28,7 +27,7 @@ def manejo_cliente(conection, address):
             data = conection.recv(1024).decode().strip()
             if data == "VER_MESAS":
                 if not mesas:
-                    conection.sendall(b"No hay mesas disponibles.\n")
+                    conection.sendall("No hay mesas disponibles.\n".encode())
                 else:
                     respuesta = "Mesas disponibles:\n"
                     for mid, mesa in mesas.items():
@@ -53,11 +52,11 @@ def manejo_cliente(conection, address):
                         mesa_asignada.agregar_jugador(conection, jugador)
                         conection.sendall(f"Unido a la mesa {mid}. ¡Empezá a jugar!\n".encode())
                     else:
-                        conection.sendall(b"ID de mesa invalido.\n")
+                        conection.sendall("ID de mesa inválido.\n".encode())
                 except:
-                    conection.sendall(b"Uso incorrecto. Ej: UNIRSE_MESA 1\n")
+                    conection.sendall("Uso incorrecto. Ej: UNIRSE_MESA 1\n".encode())
             else:
-                conection.sendall(b"Comando no reconocido.\n")
+                conection.sendall("Comando no reconocido.\n".encode())
         except:
             conection.close()
             return
@@ -70,21 +69,36 @@ def manejo_cliente(conection, address):
                 break
 
             msj = data.decode().lower().strip()
+            estado = mesa_asignada.get_estado_de(conection)
 
             if msj == "pedir":
-                carta = mesa_asignada.repartir_a(conection)
-                estado = mesa_asignada.get_estado_de(conection)
-                rta = f"Carta: {carta}, Total: {estado['total']}, Estado: {estado['estado']}\n"
+                if estado["estado"] != "jugando":
+                    rta = f"No podés pedir más cartas. Estado actual: {estado['estado']}.\n"
+                else:
+                    carta = mesa_asignada.repartir_a(conection)
+                    estado = mesa_asignada.get_estado_de(conection)
+                    rta = f"Carta: {carta}, Total: {estado['total']}, Estado: {estado['estado']}\n"
+
+            elif msj == "stand":
+                if estado["estado"] != "jugando":
+                    rta = f"Ya estás en estado: {estado['estado']}.\n"
+                else:
+                    mesa_asignada.plantarse(conection)
+                    estado = mesa_asignada.get_estado_de(conection)
+                    rta = f"Te has plantado con un total de {estado['total']}.\n"
+
             elif msj == "ver_mano":
-                estado = mesa_asignada.get_estado_de(conection)
                 rta = f"Mano: {estado['mano']}, Total: {estado['total']}, Estado: {estado['estado']}\n"
+
             elif msj == "salir":
                 rta = "¡Hasta luego!\n"
                 break
+
             else:
-                rta = "Comando no reconocido. Usá 'pedir', 'ver_mano' o 'salir'.\n"
+                rta = "Comando no reconocido. Usá: pedir, stand, ver_mano o salir.\n"
 
             conection.sendall(rta.encode())
+
         except:
             break
 

@@ -13,7 +13,7 @@ class Player:
         elif self.total == 21:
             self.estado = "gano"
         return carta
-    
+
     def get_status(self):
         return {
             "nombre": self.nombre,
@@ -21,3 +21,6 @@ class Player:
             "total": self.total,
             "estado": self.estado
         }
+
+    def puede_jugar(self):
+        return self.estado == "jugando"

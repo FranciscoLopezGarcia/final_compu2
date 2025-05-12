@@ -11,19 +11,21 @@ class MesaBlackjack:
         self.juegos[conn] = Blackjack(jugador)
 
     def repartir_a(self, conn):
-        """Reparte una carta al jugador asociado a esa conexión"""
         juego = self.juegos.get(conn)
         if juego:
             return juego.repartir()
         return None
 
     def get_estado_de(self, conn):
-        """Devuelve el estado del jugador asociado a esa conexión"""
         juego = self.juegos.get(conn)
         if juego:
             return juego.jugador.get_status()
         return None
 
+    def plantarse(self, conn):
+        juego = self.juegos.get(conn)
+        if juego:
+            juego.jugador.estado = "plantado"
+
     def get_info_mesa(self):
-        """Devuelve un resumen de los jugadores en la mesa"""
         return [jugador.nombre for jugador in self.jugadores]
