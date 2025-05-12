@@ -28,7 +28,7 @@ def manejo_cliente(conection, address):
             msj = data.decode().lower()
             if msj == "pedir":
                 carta = juego.repartir()
-                estado = jugador.get_status()
+                estado = jugador    .get_status()
                 rta = f"Carta: {carta}, Total: {estado['total']}, \n Estado: {estado['estado']}, \n"
             else:
                 rta = "Comando no reconocido. Intente 'pedir' para recibir una carta.\n"
